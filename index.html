@@ -120,6 +120,171 @@
 
     <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+const wheel = document.getElementById('wheel');
+const spinBtn = document.getElementById('spinBtn');
+const resultModal = document.getElementById('resultModal');
+const prizeDisplay = document.getElementById('prizeDisplay');
+const couponCode = document.getElementById('couponCode');
+const finalPrice = document.getElementById('finalPrice');
+const leadForm = document.getElementById('leadForm');
+const registrationSection = document.getElementById('registrationSection');
+const gameSection = document.getElementById('gameSection');
+const followSection = document.getElementById('followSection');
+const unlockGameBtn = document.getElementById('unlockGameBtn');
+const downloadLeadsBtn = document.getElementById('downloadLeadsBtn');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+
+const prizes = [
+    { label: 'FREE', value: 100, color: '#f59e0b', code: 'UT-FREE' },
+    { label: '10% OFF', value: 10, color: '#6366f1', code: 'UT-10OFF' },
+    { label: '50% OFF', value: 50, color: '#a855f7', code: 'UT-50OFF' },
+    { label: '20% OFF', value: 20, color: '#ec4899', code: 'UT-20OFF' },
+    { label: '60% OFF', value: 60, color: '#f43f5e', code: 'UT-60OFF' },
+    { label: '30% OFF', value: 30, color: '#10b981', code: 'UT-30OFF' },
+    { label: '40% OFF', value: 40, color: '#06b6d4', code: 'UT-40OFF' },
+    { label: 'SURPRISE', value: 75, color: '#fbbf24', code: 'UT-SECRET' }
+];
+
+const originalPrice = 3499;
+let currentRotation = 0;
+let isSpinning = false;
+let currentUserData = null;
+
+function setupWheel() {
+    wheel.innerHTML = '';
+    const segmentAngle = 360 / prizes.length;
+    prizes.forEach(function(prize, index) {
+        const label = document.createElement('span');
+        label.innerText = prize.label;
+        const rotation = (index * segmentAngle) + (segmentAngle / 2);
+        label.style.transform = 'rotate(' + (rotation - 90) + 'deg)';
+        wheel.appendChild(label);
+    });
+}
+
+function spin() {
+    if (isSpinning || localStorage.getItem('unsaidtalks_played')) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+
+    const prizeIndex = Math.floor(Math.random() * prizes.length);
+    const prize = prizes[prizeIndex];
+    const segmentSize = 360 / prizes.length;
+    const spins = 10 + Math.floor(Math.random() * 5);
+    const randomOffset = Math.random() * (segmentSize * 0.8) + (segmentSize * 0.1);
+    const targetRotation = (spins * 360) - (prizeIndex * segmentSize) - randomOffset;
+    currentRotation += (targetRotation - (currentRotation % 360)) + (spins * 360);
+    wheel.style.transform = 'rotate(' + currentRotation + 'deg)';
+
+    setTimeout(function() {
+        showResult(prize);
+        isSpinning = false;
+        spinBtn.disabled = false;
+    }, 5000);
+}
+
+function showResult(prize) {
+    prizeDisplay.innerText = prize.label + "!";
+    couponCode.innerText = prize.code;
+    var discount = (originalPrice * prize.value) / 100;
+    var discountedPrice = Math.round(originalPrice - discount);
+    finalPrice.innerText = discountedPrice;
+    resultModal.classList.remove('hidden');
+    sendToGoogleForm(prize.label);
+    localStorage.setItem('unsaidtalks_played', 'true');
+    spinBtn.disabled = true;
+    spinBtn.innerText = "ALREADY PLAYED";
+    spinBtn.style.opacity = "0.5";
+    spinBtn.style.cursor = "not-allowed";
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f59e0b', '#6366f1', '#a855f7']
+    });
+}
+
+function closeModal() {
+    resultModal.classList.add('hidden');
+}
+
+function sendToGoogleForm(prizeLabel) {
+    if (!currentUserData) return;
+    var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeXOipXKPgdfopUh9BhukVgyeERh0BQe-etS2DKUclIzQt9gg/formResponse";
+    var body = new URLSearchParams();
+    body.append("entry.678959767", currentUserData.name);
+    body.append("entry.835035911", currentUserData.email);
+    body.append("entry.178551229", currentUserData.mobile);
+    body.append("entry.1782181021", currentUserData.college);
+    body.append("entry.1085174741", prizeLabel);
+    fetch(FORM_URL, { method: "POST", mode: "no-cors", body: body })
+    .then(function() { console.log("Data synced to Google Sheets"); })
+    .catch(function(err) { console.error("Sync Error:", err); });
+}
+
+spinBtn.addEventListener('click', spin);
+
+leadForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var mobile = document.getElementById('mobile').value;
+    if (localStorage.getItem('unsaidtalks_played')) {
+        alert("Aap pehle hi spin kar chuke ho! Ek person sirf ek baar hi khel sakta hai.");
+        return;
+    }
+    var existingLeads = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
+    var isDuplicate = existingLeads.some(function(lead) { return lead.mobile === mobile; });
+    if (isDuplicate) {
+        alert("Yeh Mobile Number pehle hi use ho chuka hai! Ek number se sirf 1 spin allowed hai.");
+        return;
+    }
+    currentUserData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        mobile: mobile,
+        college: document.getElementById('college').value,
+        timestamp: new Date().toISOString()
+    };
+    existingLeads.push(currentUserData);
+    localStorage.setItem('unsaidtalks_leads', JSON.stringify(existingLeads));
+    registrationSection.classList.add('hidden');
+    followSection.classList.remove('hidden');
+    step1.classList.remove('active');
+    step2.classList.add('active');
+});
+
+unlockGameBtn.addEventListener('click', function() {
+    followSection.classList.add('hidden');
+    gameSection.classList.remove('hidden');
+    gameSection.scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.steps-container').classList.add('hidden');
+});
+
+downloadLeadsBtn.addEventListener('click', function() {
+    var data = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
+    if (data.length === 0) { alert("No leads collected yet!"); return; }
+    var csvContent = "data:text/csv;charset=utf-8," 
+        + "Name,Email,Mobile,College,Timestamp\n"
+        + data.map(function(u) { return u.name+","+u.email+","+u.mobile+","+u.college+","+u.timestamp; }).join("\n");
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "unsaidtalks_leads.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+if (localStorage.getItem('unsaidtalks_played')) {
+    registrationSection.classList.add('hidden');
+    var playedSection = document.getElementById('alreadyPlayedSection');
+    if (playedSection) playedSection.classList.remove('hidden');
+}
+
+setupWheel();
+var gradientSteps = prizes.map(function(p, i) { return p.color + ' ' + (i * (360/prizes.length)) + 'deg ' + ((i+1) * (360/prizes.length)) + 'deg'; }).join(', ');
+wheel.style.background = 'conic-gradient(' + gradientSteps + ')';
+    </script>
 </body>
 </html>
