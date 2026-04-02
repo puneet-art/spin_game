@@ -192,14 +192,12 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1I8BFuGuPW86E0CWSr
 
 
 const prizes = [
-    { label: '100% OFF', value: 100, color: '#f59e0b', code: 'UT-FREE' },
-    { label: '88% OFF', value: 88.6, color: '#6366f1', code: 'UT-PRO-MAX' },
-    { label: '85% OFF', value: 85.7, color: '#a855f7', code: 'UT-ULTRA' },
-    { label: '82% OFF', value: 82.9, color: '#ec4899', code: 'UT-ELITE' },
-    { label: '77% OFF', value: 77.2, color: '#f43f5e', code: 'UT-STAR' },
-    { label: '71% OFF', value: 71.4, color: '#10b981', code: 'UT-PRO' },
-    { label: '60% OFF', value: 60, color: '#06b6d4', code: 'UT-PLUS' },
-    { label: '50% OFF', value: 50, color: '#fbbf24', code: 'UT-STUDENT' }
+    { label: '100% OFF', value: 100, color: '#f59e0b', code: 'UT-FREE', weight: 3 },
+    { label: '88% OFF', value: 88.6, color: '#6366f1', code: 'UT-PRO-MAX', weight: 10 },
+    { label: '85% OFF', value: 85.7, color: '#a855f7', code: 'UT-ULTRA', weight: 12 },
+    { label: '82% OFF', value: 82.9, color: '#ec4899', code: 'UT-ELITE', weight: 15 },
+    { label: '77% OFF', value: 77.2, color: '#f43f5e', code: 'UT-STAR', weight: 25 },
+    { label: '71% OFF', value: 71.4, color: '#10b981', code: 'UT-PRO', weight: 35 }
 ];
 
 const originalPrice = 3499;
@@ -225,19 +223,35 @@ function spin() {
     isSpinning = true;
     spinBtn.disabled = true;
 
-    let prizeIndex = Math.floor(Math.random() * prizes.length);
+    // Define weights based on business priority
+    // 999 > 799 > 599 > 499 > 399 > FREE
+    let weights = prizes.map(p => p.weight);
     
     // BUSINESS LOGIC: Limit FREE prizes to 10
-    if (prizes[prizeIndex].label === 'FREE' && freeWinnersCount >= 10) {
-        // Redirect to 60% OFF (index 4)
-        prizeIndex = 4;
+    if (freeWinnersCount >= 10) {
+        weights[0] = 0; // Remove FREE from pool
+        weights[5] += 3; // Add its odds to 999 (71% OFF)
+    }
+
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    let random = Math.random() * totalWeight;
+    let prizeIndex = 0;
+
+    for (let i = 0; i < weights.length; i++) {
+        if (random < weights[i]) {
+            prizeIndex = i;
+            break;
+        }
+        random -= weights[i];
     }
 
     const prize = prizes[prizeIndex];
     const segmentSize = 360 / prizes.length;
     const spins = 10 + Math.floor(Math.random() * 5);
     const randomOffset = Math.random() * (segmentSize * 0.8) + (segmentSize * 0.1);
-    const targetRotation = (spins * 360) - (prizeIndex * segmentSize) - randomOffset;
+    
+    // Precision targeting: calculate exact rotation to land on the weighted index
+    const targetRotation = (spins * 360) - (prizeIndex * segmentSize) - (segmentSize / 2);
     currentRotation += (targetRotation - (currentRotation % 360)) + (spins * 360);
     wheel.style.transform = 'rotate(' + currentRotation + 'deg)';
 
