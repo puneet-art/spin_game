@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win - UnsaidTalks UMP Starter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <img src="https://unsaidtalks.com/wp-content/uploads/2023/03/logo-no-bg.png" alt="UnsaidTalks Logo" class="main-logo">
+            <h1>Spin to Win Your Dream Career!</h1>
+            <p class="subtitle">Complete registration to unlock the wheel & get exclusive offers</p>
+        </header>
+
+        <main>
+            <!-- Progress Steps -->
+            <div class="steps-container">
+                <div class="step active" id="step1">1. Register</div>
+                <div class="step" id="step2">2. Follow</div>
+            </div>
+
+            <!-- Already Played Message -->
+            <section id="alreadyPlayedSection" class="registration-form hidden">
+                <h3>Already Played! 🏆</h3>
+                <p class="step-desc">You have already spun the wheel for the Manav Rachna Stall. Please claim your offer using the code provided earlier.</p>
+                <div class="insta-box">
+                    <span>Follow us for more updates!</span>
+                </div>
+            </section>
+
+            <!-- Step 1: Registration Form -->
+            <section id="registrationSection" class="registration-form">
+                <h3>Enter Details to Play</h3>
+                <form id="leadForm">
+                    <div class="input-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Email ID</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" placeholder="Enter 10-digit mobile no." pattern="[0-9]{10}" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="college">College Name</label>
+                        <input type="text" id="college" placeholder="Enter college name" required>
+                    </div>
+                    <button type="submit" class="register-btn">NEXT STEP</button>
+                </form>
+            </section>
+
+            <!-- Step 2: Social Follow -->
+            <section id="followSection" class="registration-form hidden">
+                <h3>Final Step! 🤳</h3>
+                <p class="step-desc">Connect with us to unlock the Spin Wheel</p>
+                
+                <div class="social-links">
+                    <a href="https://www.instagram.com/unsaidtalks/" target="_blank" class="social-item insta-item">
+                        <img src="https://img.icons8.com/color/48/instagram-new--v1.png" alt="Insta">
+                        <span>Follow Insta</span>
+                    </a>
+                    <a href="https://www.linkedin.com/in/raghav-chopra/" target="_blank" class="social-item linkedin-item">
+                        <img src="https://img.icons8.com/color/48/linkedin.png" alt="LinkedIn">
+                        <span>Connect on LinkedIn</span>
+                    </a>
+                </div>
+
+                <button id="unlockGameBtn" class="register-btn" style="margin-top: 1rem;">I HAVE FOLLOWED</button>
+                <p class="mute-text">Click after connecting to unlock the wheel</p>
+            </section>
+
+            <!-- Step 4: Wheel Section (Hidden initially) -->
+            <section id="gameSection" class="hidden">
+                <div class="wheel-section">
+                    <div class="wheel-outer">
+                        <div class="pointer">▼</div>
+                        <div id="wheel" class="wheel">
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="spinBtn" class="spin-button">SPIN NOW</button>
+            </section>
+
+            <div class="course-info">
+                <h3>UMP Starter Course</h3>
+                <div class="price-tag">
+                    <span class="original-price">₹3499</span>
+                    <span class="discount-badge">SAVE BIG</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Result Modal -->
+        <div id="resultModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="confetti-anchor"></div>
+                <h2>🎉 Congratulations! 🎉</h2>
+                <div id="prizeDisplay" class="prize-text"></div>
+                <p>Use this code to claim your offer on the UMP Starter Course.</p>
+                <div class="coupon-code" id="couponCode">UT-SPIN-2024</div>
+                <a href="https://live.unsaidtalks.com/ump-starter" target="_blank" class="claim-btn">CLAIM OFFER AT ₹<span id="finalPrice">---</span></a>
+                <button class="close-modal" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Built for UnsaidTalks Stall Event @ 2026</p>
+            <button id="downloadLeadsBtn" style="background:transparent; border:none; color:rgba(255,255,255,0.1); font-size:0.6rem; cursor:pointer; margin-top:0.5rem;">Admin: Download Leads</button>
+        </div>
+    </div>
+
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+const wheel = document.getElementById('wheel');
+const spinBtn = document.getElementById('spinBtn');
+const resultModal = document.getElementById('resultModal');
+const prizeDisplay = document.getElementById('prizeDisplay');
+const couponCode = document.getElementById('couponCode');
+const finalPrice = document.getElementById('finalPrice');
+const leadForm = document.getElementById('leadForm');
+const registrationSection = document.getElementById('registrationSection');
+const gameSection = document.getElementById('gameSection');
+const followSection = document.getElementById('followSection');
+const unlockGameBtn = document.getElementById('unlockGameBtn');
+const downloadLeadsBtn = document.getElementById('downloadLeadsBtn');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+
+const prizes = [
+    { label: 'FREE', value: 100, color: '#f59e0b', code: 'UT-FREE' },
+    { label: '10% OFF', value: 10, color: '#6366f1', code: 'UT-10OFF' },
+    { label: '50% OFF', value: 50, color: '#a855f7', code: 'UT-50OFF' },
+    { label: '20% OFF', value: 20, color: '#ec4899', code: 'UT-20OFF' },
+    { label: '60% OFF', value: 60, color: '#f43f5e', code: 'UT-60OFF' },
+    { label: '30% OFF', value: 30, color: '#10b981', code: 'UT-30OFF' },
+    { label: '40% OFF', value: 40, color: '#06b6d4', code: 'UT-40OFF' },
+    { label: 'SURPRISE', value: 75, color: '#fbbf24', code: 'UT-SECRET' }
+];
+
+const originalPrice = 3499;
+let currentRotation = 0;
+let isSpinning = false;
+let currentUserData = null;
+
+function setupWheel() {
+    wheel.innerHTML = '';
+    const segmentAngle = 360 / prizes.length;
+    prizes.forEach(function(prize, index) {
+        const label = document.createElement('span');
+        label.innerText = prize.label;
+        const rotation = (index * segmentAngle) + (segmentAngle / 2);
+        label.style.transform = 'rotate(' + (rotation - 90) + 'deg)';
+        wheel.appendChild(label);
+    });
+}
+
+function spin() {
+    if (isSpinning || localStorage.getItem('unsaidtalks_played')) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+
+    const prizeIndex = Math.floor(Math.random() * prizes.length);
+    const prize = prizes[prizeIndex];
+    const segmentSize = 360 / prizes.length;
+    const spins = 10 + Math.floor(Math.random() * 5);
+    const randomOffset = Math.random() * (segmentSize * 0.8) + (segmentSize * 0.1);
+    const targetRotation = (spins * 360) - (prizeIndex * segmentSize) - randomOffset;
+    currentRotation += (targetRotation - (currentRotation % 360)) + (spins * 360);
+    wheel.style.transform = 'rotate(' + currentRotation + 'deg)';
+
+    setTimeout(function() {
+        showResult(prize);
+        isSpinning = false;
+        spinBtn.disabled = false;
+    }, 5000);
+}
+
+function showResult(prize) {
+    prizeDisplay.innerText = prize.label + "!";
+    couponCode.innerText = prize.code;
+    var discount = (originalPrice * prize.value) / 100;
+    var discountedPrice = Math.round(originalPrice - discount);
+    finalPrice.innerText = discountedPrice;
+    resultModal.classList.remove('hidden');
+    sendToGoogleForm(prize.label);
+    localStorage.setItem('unsaidtalks_played', 'true');
+    spinBtn.disabled = true;
+    spinBtn.innerText = "ALREADY PLAYED";
+    spinBtn.style.opacity = "0.5";
+    spinBtn.style.cursor = "not-allowed";
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f59e0b', '#6366f1', '#a855f7']
+    });
+}
+
+function closeModal() {
+    resultModal.classList.add('hidden');
+}
+
+function sendToGoogleForm(prizeLabel) {
+    if (!currentUserData) return;
+    var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeXOipXKPgdfopUh9BhukVgyeERh0BQe-etS2DKUclIzQt9gg/formResponse";
+    var body = new URLSearchParams();
+    body.append("entry.678959767", currentUserData.name);
+    body.append("entry.835035911", currentUserData.email);
+    body.append("entry.178551229", currentUserData.mobile);
+    body.append("entry.1782181021", currentUserData.college);
+    body.append("entry.1085174741", prizeLabel);
+    fetch(FORM_URL, { method: "POST", mode: "no-cors", body: body })
+    .then(function() { console.log("Data synced to Google Sheets"); })
+    .catch(function(err) { console.error("Sync Error:", err); });
+}
+
+spinBtn.addEventListener('click', spin);
+
+leadForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var mobile = document.getElementById('mobile').value;
+    if (localStorage.getItem('unsaidtalks_played')) {
+        alert("Aap pehle hi spin kar chuke ho! Ek person sirf ek baar hi khel sakta hai.");
+        return;
+    }
+    var existingLeads = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
+    var isDuplicate = existingLeads.some(function(lead) { return lead.mobile === mobile; });
+    if (isDuplicate) {
+        alert("Yeh Mobile Number pehle hi use ho chuka hai! Ek number se sirf 1 spin allowed hai.");
+        return;
+    }
+    currentUserData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        mobile: mobile,
+        college: document.getElementById('college').value,
+        timestamp: new Date().toISOString()
+    };
+    existingLeads.push(currentUserData);
+    localStorage.setItem('unsaidtalks_leads', JSON.stringify(existingLeads));
+    registrationSection.classList.add('hidden');
+    followSection.classList.remove('hidden');
+    step1.classList.remove('active');
+    step2.classList.add('active');
+});
+
+unlockGameBtn.addEventListener('click', function() {
+    followSection.classList.add('hidden');
+    gameSection.classList.remove('hidden');
+    gameSection.scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.steps-container').classList.add('hidden');
+});
+
+downloadLeadsBtn.addEventListener('click', function() {
+    var data = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
+    if (data.length === 0) { alert("No leads collected yet!"); return; }
+    var csvContent = "data:text/csv;charset=utf-8," 
+        + "Name,Email,Mobile,College,Timestamp\n"
+        + data.map(function(u) { return u.name+","+u.email+","+u.mobile+","+u.college+","+u.timestamp; }).join("\n");
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "unsaidtalks_leads.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+if (localStorage.getItem('unsaidtalks_played')) {
+    registrationSection.classList.add('hidden');
+    var playedSection = document.getElementById('alreadyPlayedSection');
+    if (playedSection) playedSection.classList.remove('hidden');
+}
+
+setupWheel();
+var gradientSteps = prizes.map(function(p, i) { return p.color + ' ' + (i * (360/prizes.length)) + 'deg ' + ((i+1) * (360/prizes.length)) + 'deg'; }).join(', ');
+wheel.style.background = 'conic-gradient(' + gradientSteps + ')';
+    </script>
+</body>
+</html>
