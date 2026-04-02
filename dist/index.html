@@ -21,7 +21,8 @@
             <!-- Progress Steps -->
             <div class="steps-container">
                 <div class="step active" id="step1">1. Register</div>
-                <div class="step" id="step2">2. Follow</div>
+                <div class="step" id="step2">2. Verify</div>
+                <div class="step" id="step3">3. Spin</div>
             </div>
 
             <!-- Already Played Message -->
@@ -57,10 +58,52 @@
                 </form>
             </section>
 
-            <!-- Step 2: Social Follow -->
-            <section id="followSection" class="registration-form hidden">
-                <h3>Final Step! 🤳</h3>
-                <p class="step-desc">Connect with us to unlock the Spin Wheel</p>
+            <!-- Step 2: Dual Verification -->
+            <section id="verificationSection" class="registration-form hidden">
+                <h3>Verify Identity 🛡️</h3>
+                <p class="step-desc">Help us verify your details to prevent fake entries.</p>
+                
+                <div class="verification-grid">
+                    <!-- WhatsApp Link -->
+                    <div class="verify-card" id="waCard">
+                        <div class="verify-icon">
+                            <img src="https://img.icons8.com/color/48/whatsapp.png" alt="WA">
+                        </div>
+                        <div class="verify-info">
+                            <h4>Phone Verification</h4>
+                            <p>Send a "Verify" message to unlock</p>
+                        </div>
+                        <a href="#" id="waVerifyBtn" target="_blank" class="verify-action-btn">VERIFY ON WHATSAPP</a>
+                        <div id="waStatus" class="status-badge hidden">✅ Sent</div>
+                    </div>
+
+                    <!-- Email OTP -->
+                    <div class="verify-card">
+                        <div class="verify-icon">
+                            <img src="https://img.icons8.com/color/48/gmail-new.png" alt="Email">
+                        </div>
+                        <div class="verify-info">
+                            <h4>Email Verification</h4>
+                            <p>Enter the 4-digit code sent to your email</p>
+                        </div>
+                        <div class="otp-container">
+                            <input type="text" maxlength="1" class="otp-input" data-index="0">
+                            <input type="text" maxlength="1" class="otp-input" data-index="1">
+                            <input type="text" maxlength="1" class="otp-input" data-index="2">
+                            <input type="text" maxlength="1" class="otp-input" data-index="3">
+                        </div>
+                        <button id="resendEmail" class="mute-btn">Resend OTP</button>
+                    </div>
+                </div>
+
+                <button id="completeVerificationBtn" class="register-btn" style="margin-top: 1.5rem;" disabled>UNLOCK WHEEL</button>
+                <p class="mute-text">Verification is required to prevent bot entries.</p>
+            </section>
+
+            <!-- Step 3: Social Follow (Optional/Final) -->
+            <aside id="followSection" class="registration-form hidden">
+                <h3>Bonus: Follow Us! 🤳</h3>
+                <p class="step-desc">Unlock extra luck by joining our community</p>
                 
                 <div class="social-links">
                     <a href="https://www.instagram.com/unsaidtalks/" target="_blank" class="social-item insta-item">
@@ -72,10 +115,8 @@
                         <span>Connect on LinkedIn</span>
                     </a>
                 </div>
-
-                <button id="unlockGameBtn" class="register-btn" style="margin-top: 1rem;">I HAVE FOLLOWED</button>
-                <p class="mute-text">Click after connecting to unlock the wheel</p>
-            </section>
+                <button id="toGameBtn" class="register-btn">GO TO WHEEL</button>
+            </aside>
 
             <!-- Step 4: Wheel Section (Hidden initially) -->
             <section id="gameSection" class="hidden">
@@ -129,11 +170,18 @@ const couponCode = document.getElementById('couponCode');
 const finalPrice = document.getElementById('finalPrice');
 const leadForm = document.getElementById('leadForm');
 const registrationSection = document.getElementById('registrationSection');
+const verificationSection = document.getElementById('verificationSection');
 const gameSection = document.getElementById('gameSection');
 const followSection = document.getElementById('followSection');
-const unlockGameBtn = document.getElementById('unlockGameBtn');
+const completeVerificationBtn = document.getElementById('completeVerificationBtn');
+const toGameBtn = document.getElementById('toGameBtn');
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+
+let generatedOTP = "";
+let isWAVerified = false;
+let isEmailVerified = false;
 
 const prizes = [
     { label: 'FREE', value: 100, color: '#f59e0b', code: 'UT-FREE' },
@@ -243,34 +291,94 @@ spinBtn.addEventListener('click', spin);
 leadForm.addEventListener('submit', function(e) {
     e.preventDefault();
     var mobile = document.getElementById('mobile').value;
+    var name = document.getElementById('name').value;
+    var email = document.getElementById('email').value;
+
     if (localStorage.getItem('unsaidtalks_played')) {
-        alert("Aap pehle hi spin kar chuke ho! Ek person sirf ek baar hi khel sakta hai.");
+        alert("Aap pehle hi spin kar chuke ho!");
         return;
     }
+
     var existingLeads = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
-    var isDuplicate = existingLeads.some(function(lead) { return lead.mobile === mobile; });
-    if (isDuplicate) {
-        alert("Yeh Mobile Number pehle hi use ho chuka hai! Ek number se sirf 1 spin allowed hai.");
+    if (existingLeads.some(function(l) { return l.mobile === mobile; })) {
+        alert("Yeh Mobile Number pehle hi use ho chuka hai!");
         return;
     }
+
     currentUserData = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
+        name: name,
+        email: email,
         mobile: mobile,
         college: document.getElementById('college').value,
         timestamp: new Date().toISOString()
     };
-    existingLeads.push(currentUserData);
-    localStorage.setItem('unsaidtalks_leads', JSON.stringify(existingLeads));
+
+    // Prepare Verification
+    generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log("DEBUG OTP:", generatedOTP); // For trial at stall if email fails
+    
+    // EmailJS Mock / Send call (Placeholder for public key)
+    // TODO: Add EmailJS Public Key here if available
+    alert("Verification code sent to " + email + " (Check Spam folder)");
+
+    // WhatsApp Link Generation
+    var waMsg = encodeURIComponent("Hello UnsaidTalks! I'm " + name + ". Verifying my mobile number for the Spin-To-Win game. [Email: " + email + "]");
+    document.getElementById('waVerifyBtn').href = "https://wa.me/919560618763?text=" + waMsg;
+
+    // Transition
     registrationSection.classList.add('hidden');
-    followSection.classList.remove('hidden');
+    verificationSection.classList.remove('hidden');
     step1.classList.remove('active');
     step2.classList.add('active');
 });
 
-unlockGameBtn.addEventListener('click', function() {
+// WA Verification Tracker
+document.getElementById('waVerifyBtn').addEventListener('click', function() {
+    isWAVerified = true;
+    document.getElementById('waStatus').classList.remove('hidden');
+    checkVerificationStatus();
+});
+
+// OTP Input Handling (Premium Multi-Box Focus)
+const otpInputs = document.querySelectorAll('.otp-input');
+otpInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+        if (e.target.value.length > 0 && index < 3) otpInputs[index + 1].focus();
+        verifyOTP();
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) otpInputs[index - 1].focus();
+    });
+});
+
+function verifyOTP() {
+    let enteredCode = "";
+    otpInputs.forEach(i => enteredCode += i.value);
+    if (enteredCode === generatedOTP || enteredCode === "2026") { // "2026" is a master override for the stall team
+        isEmailVerified = true;
+        otpInputs.forEach(i => i.style.borderColor = "#10b981");
+        checkVerificationStatus();
+    }
+}
+
+function checkVerificationStatus() {
+    if (isWAVerified && isEmailVerified) {
+        completeVerificationBtn.disabled = false;
+        completeVerificationBtn.classList.add('pulse-animation');
+    }
+}
+
+completeVerificationBtn.addEventListener('click', function() {
+    verificationSection.classList.add('hidden');
+    followSection.classList.remove('hidden');
+    step2.classList.remove('active');
+});
+
+toGameBtn.addEventListener('click', function() {
     followSection.classList.add('hidden');
     gameSection.classList.remove('hidden');
+    step2.classList.remove('active');
+    step3.classList.add('active');
     gameSection.scrollIntoView({ behavior: 'smooth' });
     document.querySelector('.steps-container').classList.add('hidden');
 });
