@@ -192,14 +192,14 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1I8BFuGuPW86E0CWSr
 
 
 const prizes = [
-    { label: 'FREE', value: 0, color: '#f59e0b', code: 'UT-FREE' },
-    { label: '₹399', value: 399, color: '#6366f1', code: 'UT-399' },
-    { label: '₹499', value: 499, color: '#a855f7', code: 'UT-499' },
-    { label: '₹599', value: 599, color: '#ec4899', code: 'UT-599' },
-    { label: '₹699', value: 699, color: '#f43f5e', code: 'UT-699' },
-    { label: '₹799', value: 799, color: '#10b981', code: 'UT-799' },
-    { label: '₹899', value: 899, color: '#06b6d4', code: 'UT-899' },
-    { label: '₹999', value: 999, color: '#fbbf24', code: 'UT-999' }
+    { label: '100% OFF', value: 100, color: '#f59e0b', code: 'UT-FREE' },
+    { label: '88% OFF', value: 88.6, color: '#6366f1', code: 'UT-PRO' },
+    { label: '85% OFF', value: 85.7, color: '#a855f7', code: 'UT-ULTRA' },
+    { label: '82% OFF', value: 82.9, color: '#ec4899', code: 'UT-ELITE' },
+    { label: '77% OFF', value: 77.2, color: '#f43f5e', code: 'UT-STAR' },
+    { label: '71% OFF', value: 71.4, color: '#10b981', code: 'UT-PRO' },
+    { label: '60% OFF', value: 60, color: '#06b6d4', code: 'UT-PLUS' },
+    { label: '50% OFF', value: 50, color: '#fbbf24', code: 'UT-STUDENT' }
 ];
 
 const originalPrice = 3499;
@@ -251,12 +251,22 @@ function spin() {
 function showResult(prize) {
     prizeDisplay.innerText = prize.label + "!";
     couponCode.innerText = prize.code;
-    finalPrice.innerText = prize.value === 0 ? "0 (FREE)" : prize.value;
+    
+    var discount = (originalPrice * prize.value) / 100;
+    var discountedPrice = Math.round(originalPrice - discount);
+    
+    // Handle FREE case
+    if (prize.value === 100) {
+        finalPrice.innerText = "0 (FREE)";
+    } else {
+        finalPrice.innerText = discountedPrice;
+    }
+    
     resultModal.classList.remove('hidden');
     sendToGoogleForm(prize.label);
     
     // Increment FREE count if won
-    if (prize.label === 'FREE') {
+    if (prize.label === '100% OFF') {
         freeWinnersCount++;
         localStorage.setItem('unsaidtalks_free_count', freeWinnersCount.toString());
     }
