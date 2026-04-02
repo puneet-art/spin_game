@@ -455,7 +455,12 @@ document.querySelector('.main-logo').addEventListener('click', function() {
     logoClicks++;
     if (logoClicks >= 5) {
         logoClicks = 0;
-        openAdmin();
+        const pass = prompt("ADMIN AUTHORIZATION REQUIRED:");
+        if (pass === "2026") {
+            openAdmin();
+        } else if (pass !== null) {
+            alert("Unauthorized Access Attempt Blocked.");
+        }
     }
 });
 
