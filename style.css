@@ -387,6 +387,18 @@ header h1 {
     margin-left: 0.5rem;
 }
 
+.refund-text {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+    padding: 0.8rem;
+    border-radius: 0.8rem;
+    border: 1px dashed rgba(251, 191, 36, 0.3);
+    line-height: 1.4;
+}
+
 /* Modal Styling */
 .modal {
     position: fixed;

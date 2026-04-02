@@ -39,7 +39,7 @@
                 <form id="leadForm">
                     <div class="input-group">
                         <label for="name">Full Name</label>
-                        <input type="text" id="name" placeholder="Enter your name" required>
+                        <input type="text" id="name" placeholder="Enter your name" minlength="3" required>
                     </div>
                     <div class="input-group">
                         <label for="email">Email ID</label>
@@ -47,7 +47,7 @@
                     </div>
                     <div class="input-group">
                         <label for="mobile">Mobile Number</label>
-                        <input type="tel" id="mobile" placeholder="Enter 10-digit mobile no." pattern="[0-9]{10}" required>
+                        <input type="tel" id="mobile" placeholder="Enter 10-digit mobile no." pattern="[6789][0-9]{9}" title="Please enter a valid 10-digit Indian mobile number" required>
                     </div>
                     <div class="input-group">
                         <label for="college">College Name</label>
@@ -96,6 +96,7 @@
                     <span class="original-price">₹3499</span>
                     <span class="discount-badge">SAVE BIG</span>
                 </div>
+                <p class="refund-text">🌟 100% Refund on completing the program within 2 months!</p>
             </div>
         </main>
 
@@ -114,7 +115,6 @@
 
         <div class="footer">
             <p>Built for UnsaidTalks Stall Event @ 2026</p>
-            <button id="downloadLeadsBtn" style="background:transparent; border:none; color:rgba(255,255,255,0.1); font-size:0.6rem; cursor:pointer; margin-top:0.5rem;">Admin: Download Leads</button>
         </div>
     </div>
 
@@ -132,7 +132,6 @@ const registrationSection = document.getElementById('registrationSection');
 const gameSection = document.getElementById('gameSection');
 const followSection = document.getElementById('followSection');
 const unlockGameBtn = document.getElementById('unlockGameBtn');
-const downloadLeadsBtn = document.getElementById('downloadLeadsBtn');
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 
@@ -151,6 +150,7 @@ const originalPrice = 3499;
 let currentRotation = 0;
 let isSpinning = false;
 let currentUserData = null;
+let freeWinnersCount = parseInt(localStorage.getItem('unsaidtalks_free_count') || '0');
 
 function setupWheel() {
     wheel.innerHTML = '';
@@ -169,7 +169,14 @@ function spin() {
     isSpinning = true;
     spinBtn.disabled = true;
 
-    const prizeIndex = Math.floor(Math.random() * prizes.length);
+    let prizeIndex = Math.floor(Math.random() * prizes.length);
+    
+    // BUSINESS LOGIC: Limit FREE prizes to 10
+    if (prizes[prizeIndex].label === 'FREE' && freeWinnersCount >= 10) {
+        // Redirect to 60% OFF (index 4)
+        prizeIndex = 4;
+    }
+
     const prize = prizes[prizeIndex];
     const segmentSize = 360 / prizes.length;
     const spins = 10 + Math.floor(Math.random() * 5);
@@ -193,6 +200,13 @@ function showResult(prize) {
     finalPrice.innerText = discountedPrice;
     resultModal.classList.remove('hidden');
     sendToGoogleForm(prize.label);
+    
+    // Increment FREE count if won
+    if (prize.label === 'FREE') {
+        freeWinnersCount++;
+        localStorage.setItem('unsaidtalks_free_count', freeWinnersCount.toString());
+    }
+
     localStorage.setItem('unsaidtalks_played', 'true');
     spinBtn.disabled = true;
     spinBtn.innerText = "ALREADY PLAYED";
@@ -261,7 +275,17 @@ unlockGameBtn.addEventListener('click', function() {
     document.querySelector('.steps-container').classList.add('hidden');
 });
 
-downloadLeadsBtn.addEventListener('click', function() {
+// ADMIN SECRET: 5 clicks on the logo to download leads
+let logoClicks = 0;
+document.querySelector('.main-logo').addEventListener('click', function() {
+    logoClicks++;
+    if (logoClicks >= 5) {
+        logoClicks = 0;
+        downloadLeads();
+    }
+});
+
+function downloadLeads() {
     var data = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
     if (data.length === 0) { alert("No leads collected yet!"); return; }
     var csvContent = "data:text/csv;charset=utf-8," 
@@ -274,7 +298,7 @@ downloadLeadsBtn.addEventListener('click', function() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-});
+}
 
 if (localStorage.getItem('unsaidtalks_played')) {
     registrationSection.classList.add('hidden');
