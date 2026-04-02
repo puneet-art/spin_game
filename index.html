@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win - UnsaidTalks UMP Starter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <img src="https://unsaidtalks.com/wp-content/uploads/2023/03/logo-no-bg.png" alt="UnsaidTalks Logo" class="main-logo">
+            <h1>Spin to Win Your Dream Career!</h1>
+            <p class="subtitle">Complete registration to unlock the wheel & get exclusive offers</p>
+        </header>
+
+        <main>
+            <!-- Progress Steps -->
+            <div class="steps-container">
+                <div class="step active" id="step1">1. Register</div>
+                <div class="step" id="step2">2. Follow</div>
+            </div>
+
+            <!-- Already Played Message -->
+            <section id="alreadyPlayedSection" class="registration-form hidden">
+                <h3>Already Played! 🏆</h3>
+                <p class="step-desc">You have already spun the wheel for the Manav Rachna Stall. Please claim your offer using the code provided earlier.</p>
+                <div class="insta-box">
+                    <span>Follow us for more updates!</span>
+                </div>
+            </section>
+
+            <!-- Step 1: Registration Form -->
+            <section id="registrationSection" class="registration-form">
+                <h3>Enter Details to Play</h3>
+                <form id="leadForm">
+                    <div class="input-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Email ID</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input type="tel" id="mobile" placeholder="Enter 10-digit mobile no." pattern="[0-9]{10}" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="college">College Name</label>
+                        <input type="text" id="college" placeholder="Enter college name" required>
+                    </div>
+                    <button type="submit" class="register-btn">NEXT STEP</button>
+                </form>
+            </section>
+
+            <!-- Step 2: Social Follow -->
+            <section id="followSection" class="registration-form hidden">
+                <h3>Final Step! 🤳</h3>
+                <p class="step-desc">Connect with us to unlock the Spin Wheel</p>
+                
+                <div class="social-links">
+                    <a href="https://www.instagram.com/unsaidtalks/" target="_blank" class="social-item insta-item">
+                        <img src="https://img.icons8.com/color/48/instagram-new--v1.png" alt="Insta">
+                        <span>Follow Insta</span>
+                    </a>
+                    <a href="https://www.linkedin.com/in/raghav-chopra/" target="_blank" class="social-item linkedin-item">
+                        <img src="https://img.icons8.com/color/48/linkedin.png" alt="LinkedIn">
+                        <span>Connect on LinkedIn</span>
+                    </a>
+                </div>
+
+                <button id="unlockGameBtn" class="register-btn" style="margin-top: 1rem;">I HAVE FOLLOWED</button>
+                <p class="mute-text">Click after connecting to unlock the wheel</p>
+            </section>
+
+            <!-- Step 4: Wheel Section (Hidden initially) -->
+            <section id="gameSection" class="hidden">
+                <div class="wheel-section">
+                    <div class="wheel-outer">
+                        <div class="pointer">▼</div>
+                        <div id="wheel" class="wheel">
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="spinBtn" class="spin-button">SPIN NOW</button>
+            </section>
+
+            <div class="course-info">
+                <h3>UMP Starter Course</h3>
+                <div class="price-tag">
+                    <span class="original-price">₹3499</span>
+                    <span class="discount-badge">SAVE BIG</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Result Modal -->
+        <div id="resultModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="confetti-anchor"></div>
+                <h2>🎉 Congratulations! 🎉</h2>
+                <div id="prizeDisplay" class="prize-text"></div>
+                <p>Use this code to claim your offer on the UMP Starter Course.</p>
+                <div class="coupon-code" id="couponCode">UT-SPIN-2024</div>
+                <a href="https://live.unsaidtalks.com/ump-starter" target="_blank" class="claim-btn">CLAIM OFFER AT ₹<span id="finalPrice">---</span></a>
+                <button class="close-modal" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Built for UnsaidTalks Stall Event @ 2026</p>
+            <button id="downloadLeadsBtn" style="background:transparent; border:none; color:rgba(255,255,255,0.1); font-size:0.6rem; cursor:pointer; margin-top:0.5rem;">Admin: Download Leads</button>
+        </div>
+    </div>
+
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
