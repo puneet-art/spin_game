@@ -192,14 +192,14 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1I8BFuGuPW86E0CWSr
 
 
 const prizes = [
-    { label: 'FREE', value: 100, color: '#f59e0b', code: 'UT-FREE' },
-    { label: '10% OFF', value: 10, color: '#6366f1', code: 'UT-10OFF' },
-    { label: '50% OFF', value: 50, color: '#a855f7', code: 'UT-50OFF' },
-    { label: '20% OFF', value: 20, color: '#ec4899', code: 'UT-20OFF' },
-    { label: '60% OFF', value: 60, color: '#f43f5e', code: 'UT-60OFF' },
-    { label: '30% OFF', value: 30, color: '#10b981', code: 'UT-30OFF' },
-    { label: '40% OFF', value: 40, color: '#06b6d4', code: 'UT-40OFF' },
-    { label: 'SURPRISE', value: 75, color: '#fbbf24', code: 'UT-SECRET' }
+    { label: 'FREE', value: 0, color: '#f59e0b', code: 'UT-FREE' },
+    { label: '₹399', value: 399, color: '#6366f1', code: 'UT-399' },
+    { label: '₹499', value: 499, color: '#a855f7', code: 'UT-499' },
+    { label: '₹599', value: 599, color: '#ec4899', code: 'UT-599' },
+    { label: '₹699', value: 699, color: '#f43f5e', code: 'UT-699' },
+    { label: '₹799', value: 799, color: '#10b981', code: 'UT-799' },
+    { label: '₹899', value: 899, color: '#06b6d4', code: 'UT-899' },
+    { label: '₹999', value: 999, color: '#fbbf24', code: 'UT-999' }
 ];
 
 const originalPrice = 3499;
@@ -251,9 +251,7 @@ function spin() {
 function showResult(prize) {
     prizeDisplay.innerText = prize.label + "!";
     couponCode.innerText = prize.code;
-    var discount = (originalPrice * prize.value) / 100;
-    var discountedPrice = Math.round(originalPrice - discount);
-    finalPrice.innerText = discountedPrice;
+    finalPrice.innerText = prize.value === 0 ? "0 (FREE)" : prize.value;
     resultModal.classList.remove('hidden');
     sendToGoogleForm(prize.label);
     
