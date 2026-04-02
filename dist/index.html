@@ -65,34 +65,16 @@
                 
                 <div class="verification-grid">
                     <!-- WhatsApp Link -->
-                    <div class="verify-card" id="waCard">
+                    <div class="verify-card" id="waCard" style="grid-column: 1 / -1;">
                         <div class="verify-icon">
                             <img src="https://img.icons8.com/color/48/whatsapp.png" alt="WA">
                         </div>
                         <div class="verify-info">
                             <h4>Phone Verification</h4>
-                            <p>Send a "Verify" message to unlock</p>
+                            <p>Send a "Verify" message to unlock the wheel instantly</p>
                         </div>
                         <a href="#" id="waVerifyBtn" target="_blank" class="verify-action-btn">VERIFY ON WHATSAPP</a>
                         <div id="waStatus" class="status-badge hidden">✅ Sent</div>
-                    </div>
-
-                    <!-- Email OTP -->
-                    <div class="verify-card">
-                        <div class="verify-icon">
-                            <img src="https://img.icons8.com/color/48/gmail-new.png" alt="Email">
-                        </div>
-                        <div class="verify-info">
-                            <h4>Email Verification</h4>
-                            <p>Enter the 4-digit code sent to your email</p>
-                        </div>
-                        <div class="otp-container">
-                            <input type="text" maxlength="1" class="otp-input" data-index="0">
-                            <input type="text" maxlength="1" class="otp-input" data-index="1">
-                            <input type="text" maxlength="1" class="otp-input" data-index="2">
-                            <input type="text" maxlength="1" class="otp-input" data-index="3">
-                        </div>
-                        <button id="resendEmail" class="mute-btn">Resend OTP</button>
                     </div>
                 </div>
 
@@ -154,6 +136,30 @@
             </div>
         </div>
 
+        <!-- Admin Dashboard Modal [NEW] -->
+        <div id="adminModal" class="modal hidden">
+            <div class="modal-content admin-dashboard">
+                <h2>Admin Dashboard 🛠️</h2>
+                <div class="admin-actions">
+                    <button class="mute-btn" onclick="downloadLeads()">Download CSV</button>
+                    <button class="mute-btn danger" onclick="clearAllData()">Reset Device</button>
+                    <button class="close-modal" onclick="closeAdmin()">Close</button>
+                </div>
+                <div class="leads-list-container">
+                    <table id="leadsTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
             <p>Built for UnsaidTalks Stall Event @ 2026</p>
         </div>
@@ -179,9 +185,7 @@ const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
 
-let generatedOTP = "";
 let isWAVerified = false;
-let isEmailVerified = false;
 
 // PASTE YOUR GOOGLE WEB APP URL HERE
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1I8BFuGuPW86E0CWSrGF7HXelrfLnX1ULSl3gX4tixJQgMquAThhdbhBXiSxhNkV4/exec"; 
@@ -317,40 +321,14 @@ leadForm.addEventListener('submit', function(e) {
         timestamp: new Date().toISOString()
     };
 
-    // Prepare Verification
-    generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-    console.log("DEBUG OTP:", generatedOTP); // Backup for stall team
-    
-    // UI Loading State
-    const submitBtn = e.target.querySelector('button');
-    const originalBtnText = submitBtn.innerText;
-    submitBtn.innerText = "SENDING OTP...";
-    submitBtn.disabled = true;
-
-    // Send Real OTP via Google Apps Script
-    if (SCRIPT_URL) {
-        fetch(`${SCRIPT_URL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&otp=${generatedOTP}`, {
-            method: 'GET',
-            mode: 'no-cors'
-        }).then(() => {
-            console.log("OTP Sent Successfully");
-            transitionToVerify();
-        }).catch(err => {
-            console.error("OTP Send Error:", err);
-            transitionToVerify(); // Still transition so stall doesn't stop
-        });
-    } else {
-        alert("Verification code: " + generatedOTP + " (Check Spam folder)");
-        transitionToVerify();
-    }
+    // Transition Directly
+    transitionToVerify();
 
     function transitionToVerify() {
-        // Ensure WhatsApp Link is generated (Updated with new coordinator number)
+        // Ensure WhatsApp Link is generated
         var waMsg = encodeURIComponent("Hello UnsaidTalks! I'm " + name + ". Verifying my mobile number for the Spin-To-Win game. [Email: " + email + "]");
         document.getElementById('waVerifyBtn').href = "https://wa.me/917303573374?text=" + waMsg;
 
-        submitBtn.innerText = originalBtnText;
-        submitBtn.disabled = false;
         registrationSection.classList.add('hidden');
         verificationSection.classList.remove('hidden');
         step1.classList.remove('active');
@@ -388,9 +366,49 @@ function verifyOTP() {
 }
 
 function checkVerificationStatus() {
-    if (isWAVerified && isEmailVerified) {
+    if (isWAVerified) {
         completeVerificationBtn.disabled = false;
         completeVerificationBtn.classList.add('pulse-animation');
+    }
+}
+
+// ADMIN DASHBOARD LOGIC
+const adminModal = document.getElementById('adminModal');
+const leadsBody = document.getElementById('leadsBody');
+
+function openAdmin() {
+    renderLeads();
+    adminModal.classList.remove('hidden');
+}
+
+function closeAdmin() {
+    adminModal.classList.add('hidden');
+}
+
+function renderLeads() {
+    const leads = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
+    leadsBody.innerHTML = leads.map((lead, index) => `
+        <tr>
+            <td>${lead.name}</td>
+            <td>${lead.mobile}</td>
+            <td><button class="mute-btn danger" onclick="deleteLead(${index})">🗑️</button></td>
+        </tr>
+    `).join('');
+}
+
+function deleteLead(index) {
+    if (confirm("Reset this user? They will be able to play again.")) {
+        const leads = JSON.parse(localStorage.getItem('unsaidtalks_leads') || '[]');
+        leads.splice(index, 1);
+        localStorage.setItem('unsaidtalks_leads', JSON.stringify(leads));
+        renderLeads();
+    }
+}
+
+function clearAllData() {
+    if (confirm("NUCLEAR RESET: Clear ALL leads and spin status from this device?")) {
+        localStorage.clear();
+        location.reload();
     }
 }
 
@@ -415,7 +433,7 @@ document.querySelector('.main-logo').addEventListener('click', function() {
     logoClicks++;
     if (logoClicks >= 5) {
         logoClicks = 0;
-        downloadLeads();
+        openAdmin();
     }
 });
 
