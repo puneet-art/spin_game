@@ -183,6 +183,10 @@ let generatedOTP = "";
 let isWAVerified = false;
 let isEmailVerified = false;
 
+// PASTE YOUR GOOGLE WEB APP URL HERE
+const SCRIPT_URL = ""; 
+
+
 const prizes = [
     { label: 'FREE', value: 100, color: '#f59e0b', code: 'UT-FREE' },
     { label: '10% OFF', value: 10, color: '#6366f1', code: 'UT-10OFF' },
@@ -315,21 +319,43 @@ leadForm.addEventListener('submit', function(e) {
 
     // Prepare Verification
     generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-    console.log("DEBUG OTP:", generatedOTP); // For trial at stall if email fails
+    console.log("DEBUG OTP:", generatedOTP); // Backup for stall team
     
-    // EmailJS Mock / Send call (Placeholder for public key)
-    // TODO: Add EmailJS Public Key here if available
-    alert("Verification code sent to " + email + " (Check Spam folder)");
+    // UI Loading State
+    const submitBtn = e.target.querySelector('button');
+    const originalBtnText = submitBtn.innerText;
+    submitBtn.innerText = "SENDING OTP...";
+    submitBtn.disabled = true;
 
-    // WhatsApp Link Generation
-    var waMsg = encodeURIComponent("Hello UnsaidTalks! I'm " + name + ". Verifying my mobile number for the Spin-To-Win game. [Email: " + email + "]");
-    document.getElementById('waVerifyBtn').href = "https://wa.me/919560618763?text=" + waMsg;
+    // Send Real OTP via Google Apps Script
+    if (SCRIPT_URL) {
+        fetch(`${SCRIPT_URL}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&otp=${generatedOTP}`, {
+            method: 'GET',
+            mode: 'no-cors'
+        }).then(() => {
+            console.log("OTP Sent Successfully");
+            transitionToVerify();
+        }).catch(err => {
+            console.error("OTP Send Error:", err);
+            transitionToVerify(); // Still transition so stall doesn't stop
+        });
+    } else {
+        alert("Verification code: " + generatedOTP + " (Check Spam folder)");
+        transitionToVerify();
+    }
 
-    // Transition
-    registrationSection.classList.add('hidden');
-    verificationSection.classList.remove('hidden');
-    step1.classList.remove('active');
-    step2.classList.add('active');
+    function transitionToVerify() {
+        // Ensure WhatsApp Link is generated
+        var waMsg = encodeURIComponent("Hello UnsaidTalks! I'm " + name + ". Verifying my mobile number for the Spin-To-Win game. [Email: " + email + "]");
+        document.getElementById('waVerifyBtn').href = "https://wa.me/919560618763?text=" + waMsg;
+
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
+        registrationSection.classList.add('hidden');
+        verificationSection.classList.remove('hidden');
+        step1.classList.remove('active');
+        step2.classList.add('active');
+    }
 });
 
 // WA Verification Tracker
