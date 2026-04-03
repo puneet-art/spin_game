@@ -193,11 +193,13 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1I8BFuGuPW86E0CWSr
 
 const prizes = [
     { label: '100% OFF', value: 100, color: '#f59e0b', code: 'UT-FREE', weight: 3 },
-    { label: '88% OFF', value: 88.6, color: '#6366f1', code: 'UT-PRO-MAX', weight: 10 },
-    { label: '85% OFF', value: 85.7, color: '#a855f7', code: 'UT-ULTRA', weight: 12 },
-    { label: '82% OFF', value: 82.9, color: '#ec4899', code: 'UT-ELITE', weight: 15 },
-    { label: '77% OFF', value: 77.2, color: '#f43f5e', code: 'UT-STAR', weight: 25 },
-    { label: '71% OFF', value: 71.4, color: '#10b981', code: 'UT-PRO', weight: 35 }
+    { label: '95% OFF', value: 95, color: '#6366f1', code: 'UT-ROCKSTAR', weight: 5 },
+    { label: '88% OFF', value: 88.6, color: '#a855f7', code: 'UT-PRO-MAX', weight: 12 },
+    { label: '85% OFF', value: 85.7, color: '#ec4899', code: 'UT-ULTRA', weight: 15 },
+    { label: '82% OFF', value: 82.9, color: '#f43f5e', code: 'UT-ELITE', weight: 15 },
+    { label: '77% OFF', value: 77.2, color: '#10b981', code: 'UT-STAR', weight: 20 },
+    { label: '65% OFF', value: 65, color: '#f59e0b', code: 'UT-SAVE', weight: 15 },
+    { label: '50% OFF', value: 50, color: '#6366f1', code: 'UT-TRIAL', weight: 15 }
 ];
 
 const originalPrice = 3499;
@@ -224,13 +226,12 @@ function spin() {
     spinBtn.disabled = true;
 
     // Define weights based on business priority
-    // 999 > 799 > 599 > 499 > 399 > FREE
     let weights = prizes.map(p => p.weight);
     
     // BUSINESS LOGIC: Limit FREE prizes to 10
     if (freeWinnersCount >= 10) {
         weights[0] = 0; // Remove FREE from pool
-        weights[5] += 3; // Add its odds to 999 (71% OFF)
+        weights[7] += 3; // Shift its odds to 50% OFF (index 7)
     }
 
     const totalWeight = weights.reduce((a, b) => a + b, 0);
